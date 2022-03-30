@@ -18,13 +18,14 @@ using namespace std;
 class Poly 
 {  
 
-    friend istream &operator>>(istream &input, Poly &other);
+    friend istream &operator>>(istream &input, Poly &polyNom);
 
-    friend ostream &operator<<(ostream &output, const Poly &other);
+    friend ostream &operator<<(ostream &output, const Poly &polyNom);
 
 private:
     int* coeffPtr;
     int size;
+    int largestPoly(const Poly &x, const Poly &y) const;
 
 public:
     Poly();

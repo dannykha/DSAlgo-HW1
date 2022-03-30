@@ -12,6 +12,78 @@
 
 #include "Poly.h"
 
+istream &operator>>(istream &input, Poly &polyNom)
+{
+    bool cont = true;
+    int tempCoeff= 0;
+    int tempPower = 0;
+
+    while (cont)    
+    {
+        input >> tempCoeff;
+        input >> tempPower;
+
+        if ((tempCoeff == -1) && (tempPower == -1)) 
+        {
+            cont = false;
+        } 
+        else {
+            polyNom.setCoeff(tempCoeff, tempPower); 
+        }
+    }
+    return input;
+}   
+
+
+ostream &operator<<(ostream &output, const Poly &polyNom)
+{
+    bool zeroCheck = true;
+
+    for (int i = polyNom.size - 1; i >= 0; i--)
+    {
+        if (polyNom.coeffPtr[i] != 0)
+        {
+            zeroCheck = false;
+            output << " ";
+            if (polyNom.coeffPtr[i] > 0)
+            {
+                output << "+";
+            }
+            if (i == 0)
+            {
+                output << polyNom.coeffPtr[i];
+            }
+            else if (i == 1)
+            {
+                output << polyNom.coeffPtr[i] << "x";
+            }
+            else
+            {
+                output << polyNom.coeffPtr[i] << "x^" << i;
+            }
+        }
+    }
+    if (zeroCheck == false)
+    {
+        return output;
+    }
+    else
+    {
+        return output << "0";
+    }
+}   
+
+int Poly::largestPoly(const Poly &x, const Poly &y) const
+{
+    int max = x.size;
+
+    if (y.size > x.size)
+    {
+        max = y.size;
+    }
+    return max;
+}
+
 Poly::Poly()
 {
     this->size = 1;
@@ -28,13 +100,13 @@ Poly::Poly(int coeff)
 
 Poly::Poly(const int coeff, const int power)
 {
-    this->size = power + 1;
-    coeffPtr = new int[this->size];
+   this->size = power + 1;
+   coeffPtr = new int[this->size];
 
-    for (int i = 0; i < this->size; i++) 
-    {
-        coeffPtr[i] = 0;
-    }
+   for (int i = 0; i < this->size; i++)
+   {
+       coeffPtr[i] = 0;
+   }
     coeffPtr[power] = coeff;
 }
 
@@ -52,12 +124,12 @@ Poly::Poly(const Poly &input)
 Poly::~Poly() 
 {
     delete[] coeffPtr;
-    coeffPtr = NULL;
+    coeffPtr = nullptr;
 }
 
-int Poly::getCoeff(const int power) const 
+int Poly::getCoeff(int power) const 
 {
-    if (power >= 0 && power < this->size) 
+    if ((power >= 0) && (power < this->size)) 
     {
         return coeffPtr[power];
     } 
@@ -71,98 +143,66 @@ void Poly::setCoeff(const int coeff, const int power)
 {
     if (power >= 0) 
     {
-        if (power < this->size) 
+        if (power > this->size)   
+        {
+            int *temp = new int[power + 1];  
+
+            for (int i = 0; i < this->size; i++)
+            {
+                temp[i] = coeffPtr[i];  
+            }
+
+            for (int j = this->size; j < power + 1; j++)
+            {
+                temp[j] = 0; 
+            }
+            temp[power] = coeff; 
+
+            delete[] coeffPtr; 
+            coeffPtr = nullptr;    
+            coeffPtr = temp; 
+            temp = nullptr;     
+            this->size = power + 1;   
+        }
+        else
         {
             coeffPtr[power] = coeff;
-        } 
-        else 
-        {
-            int *temp = new int[power + 1];
-            for (int i = 0; i < this->size; i++) 
-            {
-                temp[i] = coeffPtr[i];
-            }
-            for (int j = this->size; j < power + 1; j++) 
-            {
-                temp[j] = 0;
-            }
-            temp[power] = coeff;
-
-            delete[] coeffPtr;
-            coeffPtr = NULL;
-            coeffPtr = temp;
-            temp = NULL;
-            this->size = power + 1;
         }
     }
 }
 
 Poly Poly::operator+(const Poly &other) const
 {
-    if (other.size > this->size) 
+    int tempSize = largestPoly(*this, other);
+    Poly sum(0, tempSize);
+
+    for (int i = 0; i < this->size; i++)
     {
-        Poly sum(0, other.size);
-
-        for (int i = 0; i < other.size; i++) 
-        {
-            sum.coeffPtr[i] = other.coeffPtr[i];
-        }
-
-        for (int i = 0; i < this->size; i++) 
-        {
-            sum.coeffPtr[i] += this->coeffPtr[i];
-        }
-        return sum;
-    } 
-    else 
-    {
-        Poly sum(0, this->size);
-
-        for (int i = 0; i < this->size; i++) 
-        {
-            sum.coeffPtr[i] = this->coeffPtr[i];
-        }
-
-        for (int i = 0; i < other.size; i++) 
-        {
-            sum.coeffPtr[i] += other.coeffPtr[i];
-        }
-        return sum;
+        sum.coeffPtr[i] = this->coeffPtr[i];
     }
+
+    for (int j = 0; j < other.size; j++)
+    {
+        sum.coeffPtr[j] += other.coeffPtr[j];
+    }
+    return sum;
 }
 
 Poly Poly::operator-(const Poly &other) const
 {
-    if (other.size > this->size) 
+    int tempSize = largestPoly(*this, other);
+    Poly dif(0, tempSize);
+
+    for (int i = 0; i < this->size ; i++)
     {
-        Poly dif(0, other.size);
-
-        for (int i = 0; i < this->size; i++) 
-        {
-            dif.coeffPtr[i] = this->coeffPtr[i];
-        }
-
-        for (int i = 0; i < other.size; i++) 
-        {
-            dif.coeffPtr[i] -= other.coeffPtr[i];
-        }
-        return dif;
-    } 
-    else 
-    {
-        Poly dif(0, this->size);
-
-        for (int i = 0; i < this->size; i++) 
-        {
-            dif.coeffPtr[i] = this->coeffPtr[i];
-        }
-
-        for (int i = 0; i < other.size; i++) 
-        {
-            dif.coeffPtr[i] = other.coeffPtr[i];
-        }
-        return dif;
+        dif.coeffPtr[i] = this->coeffPtr[i];
     }
+
+    for (int j = 0; j < other.size; j++)
+    {
+        dif.coeffPtr[j] -= other.coeffPtr[j];
+    }
+    return dif;
 }
 
 Poly Poly::operator*(const Poly &other) const
@@ -170,9 +210,9 @@ Poly Poly::operator*(const Poly &other) const
     int tempSize = this->size + other.size;
     Poly prod(0, tempSize);
 
-    for (int i = 0; i < this->size + 1; i++)
+    for (int i = 0; i < this->size; i++)
     {
-       for (int j = 0; j < other.size + 1; j++)
+       for (int j = 0; j < other.size; j++)
        {
            prod.coeffPtr[i + j] += this->coeffPtr[i] * other.coeffPtr[j];
        }
@@ -244,7 +284,7 @@ bool Poly::operator==(const Poly &other) const
     {
         if (this->size < other.size)
         {
-            for (int i = 0; i < this->size + 1; i++)
+            for (int i = 0; i < this->size; i++)
             {
                 if (this->coeffPtr[i] != other.coeffPtr[i])
                 {
@@ -252,7 +292,7 @@ bool Poly::operator==(const Poly &other) const
                 }
             }
 
-            for (int i = this->size + 1; i < other.size + 1; i++) 
+            for (int i = this->size; i < other.size; i++) 
             {
                 if (other.coeffPtr[i] != 0)
                 {
@@ -262,7 +302,7 @@ bool Poly::operator==(const Poly &other) const
         }
         else 
         {
-            for (int i = 0; i < other.size + 1; i++) 
+            for (int i = 0; i < other.size; i++) 
             {
                 if (this->coeffPtr[i] != other.coeffPtr[i])
                 {
@@ -270,7 +310,7 @@ bool Poly::operator==(const Poly &other) const
                 }
             }
 
-            for (int i = other.size + 1; i < this->size + 1; i++) 
+            for (int i = other.size; i < this->size; i++) 
             {
                 if (this->coeffPtr[i] != 0)
                 {
@@ -281,7 +321,7 @@ bool Poly::operator==(const Poly &other) const
     }
     else
     {
-        for (int i = 0; i < this->size + 1; i++)
+        for (int i = 0; i < this->size; i++)
         {
             if (this->coeffPtr[i] != other.coeffPtr[i])
             {
@@ -296,5 +336,6 @@ bool Poly::operator!=(const Poly& other) const
 {
     return !(*this == other);
 }
+
 
 
