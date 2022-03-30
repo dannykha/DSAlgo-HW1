@@ -4,6 +4,11 @@ using namespace std;
 
 class Poly 
 {  
+
+    friend istream &operator>>(istream &input, Poly &other);
+
+    friend ostream &operator<<(ostream &output, const Poly &other);
+
 private:
     int* coeffPtr;
     int size;
@@ -21,16 +26,13 @@ public:
     Poly operator+(const Poly &other) const;
     Poly operator-(const Poly &other) const;
     Poly operator*(const Poly &other) const;
-    Poly& operator=(const Poly &other);
 
     Poly& operator+=(const Poly &other);
     Poly& operator-=(const Poly &other);
     Poly& operator*=(const Poly &other);
 
+    Poly& operator=(const Poly &other);
+
     bool operator==(const Poly &other) const;
     bool operator!=(const Poly &other) const;
-
-    friend istream &operator>>(istream &input, Poly &ogVal);
-
-    friend ostream &operator<<(ostream &output, const Poly &ogPoly);
 };
